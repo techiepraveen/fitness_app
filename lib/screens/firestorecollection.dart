@@ -1,41 +1,18 @@
-import 'package:fitness_app/screens/homepage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_app/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-class SignIn extends StatefulWidget {
-  SignIn({
-    super.key,
-  });
+class FireStoreCollection extends StatefulWidget {
+  const FireStoreCollection({super.key});
 
   @override
-  State<SignIn> createState() => _SignInState();
+  State<FireStoreCollection> createState() => _FireStoreCollectionState();
 }
 
-class _SignInState extends State<SignIn> {
-  final _auth = FirebaseAuth.instance;
-  final emailcontroller = TextEditingController();
-  final passwordcontroller = TextEditingController();
-
-  void login() async {
-    setState(() {});
-    _auth
-        .signInWithEmailAndPassword(
-            email: emailcontroller.text, password: passwordcontroller.text)
-        .then((value) {
-      Utils().toastMessage(value.user!.uid.toString());
-      Utils().toastMessage("Login Successful");
-
-      //Navigator.pushNamed(context, '/homepage');
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (Context) =>
-                  HomePage(userName: value.user!.email.toString())));
-    }).onError((error, stackTrace) {
-      Utils().toastMessage(error.toString());
-    });
-  }
+class _FireStoreCollectionState extends State<FireStoreCollection> {
+  final fireStore = FirebaseFirestore.instance.collection('product');
+  final nameController = TextEditingController();
+  final imgController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,17 +25,16 @@ class _SignInState extends State<SignIn> {
             padding: const EdgeInsets.only(left: 12.0),
             child: Row(
               children: [
-                const Text("Username/Email : "),
+                const Text("name : "),
                 Container(
                   //height: 100,
                   //color: Colors.white,
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
-                    controller: emailcontroller,
+                    controller: nameController,
                     textAlign: TextAlign.center,
                     decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "Username/Email"),
+                        border: OutlineInputBorder(), labelText: "name"),
                   ),
                 ),
               ],
@@ -68,16 +44,16 @@ class _SignInState extends State<SignIn> {
             padding: const EdgeInsets.only(left: 52.0, top: 8.0, bottom: 8.0),
             child: Row(
               children: [
-                const Text("Password : "),
+                const Text("ImageURL : "),
                 Container(
                   //height: 100,
                   //color: Colors.white,
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: TextField(
-                    controller: passwordcontroller,
+                    controller: imgController,
                     textAlign: TextAlign.center,
                     decoration: const InputDecoration(
-                        border: OutlineInputBorder(), labelText: "password"),
+                        border: OutlineInputBorder(), labelText: "imageURL:"),
                   ),
                 ),
               ],
@@ -85,7 +61,18 @@ class _SignInState extends State<SignIn> {
           ),
           ElevatedButton(
               onPressed: () {
-                login();
+                String id = DateTime.now().millisecondsSinceEpoch.toString();
+                fireStore
+                    .doc()
+                    .set({
+                      "productID": id,
+                      "productname": nameController.text.toString(),
+                      "productImage": imgController.text.toString(),
+                    })
+                    .then((value) {})
+                    .onError((error, stackTrace) {
+                      Utils().toastMessage(error.toString());
+                    });
               },
               child: const Text("Submit")),
         ],

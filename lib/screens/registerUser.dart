@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterUser extends StatefulWidget {
   const RegisterUser({super.key});
@@ -8,7 +10,13 @@ class RegisterUser extends StatefulWidget {
 }
 
 class _RegisterUserState extends State<RegisterUser> {
+  final _firestore = FirebaseFirestore.instance;
+  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
   @override
+  final _auth = FirebaseAuth.instance;
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.green[300],
@@ -22,9 +30,10 @@ class _RegisterUserState extends State<RegisterUser> {
                 //height: 100,
                 //color: Colors.white,
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: const TextField(
+                child: TextField(
+                  controller: usernameController,
                   textAlign: TextAlign.center,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       border: OutlineInputBorder(), labelText: "Username"),
                 ),
               ),
@@ -39,9 +48,10 @@ class _RegisterUserState extends State<RegisterUser> {
                   //height: 100,
                   //color: Colors.white,
                   width: MediaQuery.of(context).size.width * 0.6,
-                  child: const TextField(
+                  child: TextField(
+                    controller: emailController,
                     textAlign: TextAlign.center,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         border: OutlineInputBorder(), labelText: "Email"),
                   ),
                 ),
@@ -55,15 +65,24 @@ class _RegisterUserState extends State<RegisterUser> {
                 //height: 100,
                 //color: Colors.white,
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: const TextField(
+                child: TextField(
+                  controller: passwordController,
                   textAlign: TextAlign.center,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       border: OutlineInputBorder(), labelText: "Password"),
                 ),
               ),
             ],
           ),
-          ElevatedButton(onPressed: () {}, child: const Text("Submit")),
+          ElevatedButton(
+              onPressed: () {
+                _auth.createUserWithEmailAndPassword(
+                    email: emailController.text,
+                    password: passwordController.text);
+                passwordController.clear();
+                emailController.clear();
+              },
+              child: const Text("Submit")),
         ],
       ),
     );
